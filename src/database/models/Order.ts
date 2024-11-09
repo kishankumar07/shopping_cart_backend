@@ -1,4 +1,18 @@
-import mongoose from 'mongoose'
+import mongoose, { Document, Types } from 'mongoose'
+
+export interface Order extends Document{
+      orderId:string;
+      customerId:string;
+      amount:number;
+      status:string;
+      txnId:string;
+      items:{
+            product:Types.ObjectId;
+            unit:number;
+      }[],
+      createdAt?: Date;
+      updatedAt?: Date;
+}
 
 const Schema = mongoose.Schema;
 
@@ -30,4 +44,4 @@ const OrderSchema = new Schema({
       timestamps:true,
 });
 
-export default mongoose.model('order',OrderSchema);
+export default mongoose.model<Order>('order',OrderSchema);

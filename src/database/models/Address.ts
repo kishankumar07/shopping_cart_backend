@@ -1,4 +1,11 @@
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
+
+export interface Address extends Document{
+      street:string;
+      postalCode:string;
+      city:string;
+      country:string;
+}
 
 const Schema = mongoose.Schema;
 

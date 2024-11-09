@@ -1,7 +1,7 @@
 import express, { Application } from 'express'
 import cors from 'cors'
 import path from 'path'
-import {customer} from './api/index'
+import {customer,product} from './api/index'
 
 export default (app:Application)=>{
       app.use(express.json({limit:'1mb'}));
@@ -10,7 +10,7 @@ export default (app:Application)=>{
 
        //api
        customer(app);
-      //  product(app);
+       product(app);
       //  shopping(app);
  
        //error handling
