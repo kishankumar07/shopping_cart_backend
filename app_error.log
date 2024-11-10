@@ -1,0 +1,5 @@
+{"level":"error","message":"Sun Nov 10 2024 13:08:39 GMT+0530 (India Standard Time) - {\"name\":\"Intentional Error\",\"statusCode\":500,\"description\":\"This is a test error for demonstration purposes\",\"isOperational\":true}","private":true}
+{"level":"error","message":"Sun Nov 10 2024 13:16:25 GMT+0530 (India Standard Time) - {\"name\":\"Missing Email\",\"statusCode\":400,\"description\":\"Email is required for signup\",\"isOperational\":true}","private":true}
+
+{"level":"error","message":"Sun Nov 10 2024 16:46:08 GMT+0530 (India Standard Time) - {\"name\":\"Error adding product to wishlist\",\"statusCode\":500,\"description\":\"Something went wrong\",\"isOperational\":true}","private":true}
+{"level":"error","message":"Sun Nov 10 2024 16:53:42 GMT+0530 (India Standard Time) - {\"name\":\"Error fetching product description\",\"statusCode\":500,\"description\":\"Unable to fetch product details\",\"isOperational\":true}","private":true}

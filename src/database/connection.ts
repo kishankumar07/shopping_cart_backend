@@ -5,6 +5,7 @@ export default async () => {
   try {
     if (DB_URL) {
       await mongoose.connect(DB_URL);
+      console.log('database connected')
     }
   } catch (error) {
     console.error("error at db connection :", error);

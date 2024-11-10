@@ -4,6 +4,7 @@ import ProductService from "../services/product-service";
 import CustomerService from "../services/customer-service";
 import { Product } from "../database/models/Product";
 import { payloadType } from "../utils/index";
+import { AppError } from "../utils/app-errors";
 
 export default (app:Application)=>{
       const service = new ProductService()
@@ -16,6 +17,11 @@ export default (app:Application)=>{
         
                   try {
                       const { name, desc, type, unit,price, available, supplier, banner } = req.body; 
+
+                      if (!name || !desc || !type || !unit || !price || !available || !supplier || !banner) {
+                         res.status(400).json({ message: 'Missing required fields' });
+                         return
+                    }
 
                       const product: Partial<Product> = {
                         name,
@@ -38,7 +44,8 @@ export default (app:Application)=>{
                     }
                    return;
                   } catch (err) {
-                      next(err)    
+                    console.error('Error in product creation:', err);
+                     next(new AppError('Error creating product', 500, 'Unable to create the product', true));   
                   }
                   
               });
@@ -50,6 +57,10 @@ export default (app:Application)=>{
         
             const type = req.params.type;
             
+            if (!type || typeof type !== 'string') {
+                 res.status(400).json({ message: 'Invalid category type' });
+                 return
+            }
             try {
             //     console.log('type at /api/product/category/:type:',type)
                 const response = await service.GetProductsByCategory(type)
@@ -58,9 +69,10 @@ export default (app:Application)=>{
               }else {
                   res.status(400).json({ message: 'details unavailable' });
               }
-                  return;
+                  
             } catch (err) {
-                next(err)
+                console.error('Error fetching products by category:', err);
+                next(new AppError('Error fetching products', 500, 'Unable to fetch products by category', true));
             }
     
         });
@@ -71,6 +83,11 @@ export default (app:Application)=>{
             app.get('/:id', async(req,res,next) => {
         
                   const productId = req.params.id;
+
+                  if (!productId || typeof productId !== 'string') {
+                     res.status(400).json({ message: 'Invalid product ID' });
+                     return;
+                }
           
                   try {
                       const response = await service.GetProductDescription(productId);
@@ -82,8 +99,9 @@ export default (app:Application)=>{
                        return;
           
                   } catch (err) {
-                      next(err)
-                  }
+                    console.error('Error fetching product description:', err);
+                    next(new AppError('Error fetching product description', 500, 'Unable to fetch product details', true));
+                }
           
               });
 
@@ -114,16 +132,18 @@ export default (app:Application)=>{
                   
                   try {
                       const product:Product | null = await service.GetProductById(req.body._id);
-                      console.log('product going to add to wishlist at /wishlist:',product)
-
-                      if(product){             
+                    //   console.log('product going to add to wishlist at /wishlist:',product)
+                    if (!product) {
+                         res.status(404).json({ message: "Product not found" });
+                         return;
+                    }
+        
                             const wishList = await customerService.AddToWishlist(_id, product as Product)
                              res.status(200).json(wishList);
-                                 return
-                     }
-                    res.status(404).json({ message: "Product not found" });
+                             return
                   } catch (err) {
-                      
+                    console.error('Error adding product to wishlist:', err);
+                     next(new AppError('Error adding product to wishlist', 500, 'Something went wrong', true));
                   }
               });
 
@@ -137,11 +157,18 @@ export default (app:Application)=>{
     
             try {
                 const product = await service.GetProductById(productId);
+
+                if (!product) {
+                     res.status(404).json({ message: 'Product not found' });
+                     return;
+                }
+
                 const wishlist = await customerService.AddToWishlist(_id, product as Product)
                  res.status(200).json(wishlist);
                  return;
             } catch (err) {
-                next(err)
+                console.error('Error removing product from wishlist:', err);
+                next(new AppError('Error removing product from wishlist', 500, 'Something went wrong', true));
             }
         });
 
@@ -151,14 +178,19 @@ export default (app:Application)=>{
             app.put('/cart',userAuth, async (req,res,next) => {
         
                   const { _id, qty } = req.body;
+                  if (!qty || qty <= 0) {
+                     res.status(400).json({ message: 'Invalid quantity' });
+                     return;
+                }
                   
                   try {     
                         // console.log(typeof qty)
                       const product:Product|null = await service.GetProductById(_id);
                       
-                      if(!product){// added a null check here by myself !
-                        throw new Error('No product retrieved')
-                      }
+                      if (!product) {
+                         res.status(404).json({ message: 'Product not found' });
+                        return
+                    }
               
                       const result =  await customerService.ManageCart(req.user._id, product, qty, false);
               
@@ -166,8 +198,9 @@ export default (app:Application)=>{
                        return;
                       
                   } catch (err) {
-                      next(err)
-                  }
+                    console.error('Error adding product to cart:', err);
+                    next(new AppError('Error processing cart update', 500, 'Unable to update cart at this time', true));
+                }
               });
 
             //DESC        delete item from cart

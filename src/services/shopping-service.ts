@@ -1,6 +1,7 @@
 import { ObjectId } from "mongoose";
 import { ShoppingRepository } from "../database/index"
 import { FormatData } from "../utils";
+import { AppError } from "../utils/app-errors";
 
 export default class ShoppingService{
       private repository : ShoppingRepository
@@ -13,7 +14,8 @@ export default class ShoppingService{
                   const orders = await this.repository.Orders(customerId);
                   return FormatData(orders);
             } catch (error) {
-                  
+                  console.error('Error in GetOrders:', error);
+                  throw new AppError('Error getting orders from database', 500, 'Unable to get the orders', true);
             }
       }
 
@@ -22,8 +24,9 @@ export default class ShoppingService{
             try {
                   const orderResult = await this.repository.CreateNewOrder(_id, txnNumber);
                   return FormatData(orderResult);
-                } catch (err) {
-                  // throw new APIError("Data Not found", err);
+                } catch (error) {
+                  console.error('Error in Placing order:', error);
+                  throw new AppError('Error Placing orders', 500, 'Unable to place the order', true);
                 }
       }
 

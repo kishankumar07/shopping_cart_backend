@@ -2,6 +2,7 @@ import mongoose, { Mongoose, ObjectId } from "mongoose";
 import { CustomerModel, OrderModel } from "../models";
 import { v4 as uuidv4 } from "uuid";
 import { Product } from "../models/Product";
+import { APIError, AppError, STATUS_CODES } from "../../utils/app-errors";
 
 interface CartItem {
       product: Product; 
@@ -16,7 +17,8 @@ export default class ShoppingRepository {
                   const orders = await OrderModel.find({customerId}).populate('items.product');
                   return orders;
             } catch (error) {
-                  
+                console.error('Error in Placing order:', error);
+                throw new AppError('Error Fetching orders', 500, 'Unable to fetch the order', true);
             }
       }
       async CreateNewOrder(customerId:ObjectId, txnId:string){
@@ -68,12 +70,11 @@ export default class ShoppingRepository {
             // return {}
   
           }catch(err){
-      //       console.log('error at createNewOrder-----------------------------------:',err)
-      //         throw APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Find Category')
-      //     }
+            console.log('error at createNewOrder-----------------------------------:',err)
+              throw new APIError('API Error', STATUS_CODES.INTERNAL_ERROR, 'Unable to Find Category')
+          }
           
   
       }
 }
   
-}

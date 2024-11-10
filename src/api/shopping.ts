@@ -22,7 +22,7 @@ export default (app:Application) =>{
                         res.status(200).json(response.data)
                    }
             } catch (error) {
-                  next()
+                  next(error)
             }
       })
 //----------------------------------------------------------------------------

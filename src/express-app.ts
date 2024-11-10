@@ -1,7 +1,9 @@
 import express, { Application } from 'express'
 import cors from 'cors'
 import path from 'path'
-import {customer,product} from './api/index'
+import {customer,product,shopping} from './api/index'
+import ErrorHandler from './utils/error-handler'
+
 
 export default (app:Application)=>{
       app.use(express.json({limit:'1mb'}));
@@ -11,8 +13,8 @@ export default (app:Application)=>{
        //api
        customer(app);
        product(app);
-      //  shopping(app);
+       shopping(app);
  
        //error handling
-       // to be filled here
+       app.use(ErrorHandler)
 }

@@ -5,6 +5,7 @@ import { AddressModel, CustomerModel } from "../models/index";
 import { Product } from "../models/Product";
 import { Types } from "mongoose";
 import mongoose from "mongoose";
+import { APIError,AppError,STATUS_CODES } from "../../utils/app-errors";
 
 
 
@@ -13,28 +14,35 @@ interface createCustomerType{
 }
 
 class CustomerRepository {
-      async CreateCustomer ({email,password,phone,salt}:createCustomerType){
+      async CreateCustomer ({email,password,phone,salt}:createCustomerType):Promise<Customer>{
             try {
                   const customer = new CustomerModel({email,password,salt,phone,address:[]});
                   const customerResult = await customer.save();
                   return customerResult;
             } catch (error) {
-                  if (error instanceof Error) {
-                        console.error('Error at CreateCustomer repo:', error.message);
-                        throw new Error(error.message);
-                  } else {
-                        console.error('Unexpected error:', error);
-                        throw new Error('An unknown error occurred');
-                  }
+               
+               console.error('Error at CreateCustomer repo:', error);
+              throw new APIError(
+               'Database Error',
+                STATUS_CODES.INTERNAL_ERROR,
+                'Unable to create customer in the database',
+                 true 
+        );
             }
       }
 
-      async FindCustomer({ email }:{email:string}) {
+      async FindCustomer({ email }:{email:string}):Promise<Customer | null> {
             try {
-              const existingCustomer = await CustomerModel.findOne({ email: email });
+              const existingCustomer = await CustomerModel.findOne({ email });
               return existingCustomer;
-            } catch (err) {
-            
+            } catch (error) {
+              console.error("FindCustomer Error:", error);
+              throw new AppError(
+                "Database Error",
+                STATUS_CODES.INTERNAL_ERROR,
+                "Unable to fetch customer from the database",
+                true
+              );
             }
           }
 
@@ -43,7 +51,15 @@ class CustomerRepository {
                   const {street,postalCode,city,country} = userInputs;
               const profile = await CustomerModel.findById(_id) as Customer;
         
-              if (profile) {
+              if (!profile) {
+                throw new AppError(
+                  'Customer Not Found',
+                  404,
+                  'No customer found with the provided ID.',
+                  true
+                );
+              }
+
                 const newAddress = new AddressModel({
                   street,
                   postalCode,
@@ -54,9 +70,7 @@ class CustomerRepository {
                 await newAddress.save();
         
                 profile.address.push(newAddress._id);
-              }
-        
-              return await profile.save();
+                return await profile.save();
             } catch (error) {
                   if (error instanceof Error) {
                         console.error('Error at createAddress repo:', error.message);
@@ -68,22 +82,23 @@ class CustomerRepository {
             }
           }
 
-          async FindCustomerById({ id }:{id:ObjectId}) {
+          async FindCustomerById({ id }:{id:ObjectId}):Promise<Customer | null> {
             try {
               const existingCustomer = await CustomerModel.findById(id)
                 .populate("address")
                 .populate("wishlist")
                 .populate("orders")
                 .populate("cart.product");
-            //     console.log('this is the exisiting customer at FindCustomerById of customer-repository:',existingCustomer)
+            //     console.log('this is the existing customer at FindCustomerById of customer-repository:',existingCustomer)
+
+            if (!existingCustomer) {
+              throw new AppError('Customer not found', 404, 'Profile does not exist',true);
+            }
+
               return existingCustomer;
             } catch (error) {
-                  if (error instanceof Error) {
-                        throw new Error(error.message);
-                  } else {
-                        console.error('Unexpected error:', error);
-                        throw new Error('An unknown error occurred');
-                  }
+                  console.error('Error at FindCustomerById:', error);
+                  throw new AppError('Database Error', 500, 'Unable to retrieve customer',true);
               
             }
           }
@@ -105,35 +120,31 @@ class CustomerRepository {
                 "wishlist"
               );
         
-              if (profile) {
-                let wishlist = profile.wishlist;
-        
-                if (wishlist.length > 0) {
-                  let isExist = wishlist.some((item) => item._id.toString() === product._id.toString());
-              
-                  if (isExist) {
-                      wishlist = wishlist.filter((item) => item._id.toString() !== product._id.toString());
-                  } else {
-                        wishlist.push(new Types.ObjectId(product._id.toString())); 
-                  }
-              } else {
-                  wishlist.push(new Types.ObjectId(product._id.toString()));
-              }
-              
-                profile.wishlist = wishlist;
-              }else  {
-                  throw new Error("Profile not found");
-              }
-        
-              const profileResult = await profile.save();
-        
-              return profileResult.wishlist;
+              if (!profile) {
+                throw new AppError('Profile not found', 404, 'Customer profile does not exist', true);
+            }
+    
+            let wishlist = profile.wishlist;
+    
+           
+            const productExists = wishlist.some((item) => item._id.toString() === product._id.toString());
+    
+            if (productExists) {
+               
+                wishlist = wishlist.filter((item) => item._id.toString() !== product._id.toString());
+            } else {
+                
+                wishlist.push(new Types.ObjectId(product._id.toString()));
+            }
+    
+           
+            profile.wishlist = wishlist;
+            const updatedProfile = await profile.save();
+    
+            return updatedProfile.wishlist; // Return the updated wishlist
             } catch (err) {
-            //   throw new APIError(
-            //     "API Error",
-            //     STATUS_CODES.INTERNAL_ERROR,
-            //     "Unable to Add to WishList"
-            //   );
+              console.error('Error in AddWishlistItem repository:', err);
+              throw new AppError('Error processing wishlist item', 500, 'Unable to update wishlist', true);
             }
           }
 
