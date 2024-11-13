@@ -48,3 +48,27 @@
 //  const coffeeMachine = new CoffeeMachine;
  
 //  coffeeMachine.#checkWater();
+
+// ------------------------------------------------------
+
+                  // Docker related 
+
+// App Exiting: If the app container is exiting, it could be due to an error during startup. It might be helpful to check the logs of the app container to identify the issue:
+
+             docker-compose logs app
+
+
+      MongoDB URI format:
+            mongodb://username:password@host:port/database
+
+
+--------------------------------------------------------
+To run the terminal in detached mode, 
+
+            docker-compose up -d
+
+to see the logs 
+
+            docker-compose logs -f
+
+-------------------------------------------------------------            

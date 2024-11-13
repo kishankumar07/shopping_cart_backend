@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  app:
+    container_name: node-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7000:7000"
+    env_file:
+      - .env.dev
+    depends_on:
+      - db
+    restart: always
+
+  db:
+    image: mongo:latest
+    container_name: mongo-db
+    volumes:
+      - mongodb_data:/data/db  
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    ports:
+      - "27017:27017"
+    restart: always
+volumes:
+  mongodb_data:  
