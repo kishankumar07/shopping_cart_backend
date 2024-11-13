@@ -9,10 +9,31 @@ export default (app:Application) =>{
       const userService = new CustomerService()
 
 //-----------------------------------------------------------------------
+     /**
+   * @swagger
+   * /shopping/order:
+   *   post:
+   *     summary: Place an order
+   *     tags: [Shopping]
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               txnNumber:
+   *                 type: string
+   *     responses:
+   *       200:
+   *         description: Order placed successfully
+   *       403:
+   *         description: Not authorized
+   */
 
-        //@Desc     To place an order
-        //POST     /shopping/order
-        //Access    Private
+
       app.post('/shopping/order',userAuth,async(req,res,next)=>{
             const { _id } = req.user;
             const { txnNumber } = req.body;
@@ -26,9 +47,23 @@ export default (app:Application) =>{
             }
       })
 //----------------------------------------------------------------------------
-      //Desc      To get all shopping details
-      //GET       /shopping/orders
-      //Access    Private
+
+ /**
+   * @swagger
+   * /shopping/orders:
+   *   get:
+   *     summary: get all the orders
+   *     description: Get all shopping orders
+   *     tags: [Shopping]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Orders retrieved successfully
+   *       500:
+   *         description: Internal server error
+   */
+
       app.get('/shopping/orders',userAuth, async (req,res,next) => {
   
             const { _id } = req.user as payloadType;
@@ -46,6 +81,23 @@ export default (app:Application) =>{
         });
 
 //-----------------------------------------------------------------------
+
+ /**
+   * @swagger
+   * /shopping/cart:
+   *   get:
+   *     summary: Get user cart details
+   *     description: Get shopping cart details
+   *     tags: [Shopping]
+   *     security:
+   *       - bearerAuth: []
+   *     responses:
+   *       200:
+   *         description: Cart details retrieved successfully
+   *       500:
+   *         description: Internal server error
+   */
+
 
         //Desc    
         app.get('/shopping/cart', userAuth, async (req,res,next) => {

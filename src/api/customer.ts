@@ -9,9 +9,33 @@ import { APIError, AppError, STATUS_CODES } from "../utils/app-errors";
 export default (app:Application) =>{
       const service = new CustomerService() 
       
-            //DESC      Register a customer
-            // POST     /customer/signup
-            // Access   Public
+  /**
+   * @swagger
+   * /customer/signup:
+   *   post:
+   *     summary: Register a new customer
+   *     description: Creates a new customer account.
+   *     tags:
+   *       - Customers
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               email:
+   *                 type: string
+   *               password:
+   *                 type: string
+   *               phone:
+   *                 type: string
+   *     responses:
+   *       201:
+   *         description: Customer created successfully
+   *       400:
+   *         description: Missing Email or Signup Error
+   */
       app.post('/customer/signup', async(req:Request,res:Response,next:NextFunction) =>{
             try {
 
@@ -58,9 +82,31 @@ export default (app:Application) =>{
             }
       })
 
-            //DESC      Login a user
-            // POST     /customer/login
-            // Access   Public
+/**
+   * @swagger
+   * /customer/login:
+   *   post:
+   *     summary: Login a customer
+   *     description: Authenticates a customer and returns a token.
+   *     tags:
+   *       - Customers
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               email:
+   *                 type: string
+   *               password:
+   *                 type: string
+   *     responses:
+   *       200:
+   *         description: Login successful
+   *       400:
+   *         description: Incorrect password or User does not exist
+   */
             app.post("/customer/login", async (req:Request, res:Response, next:NextFunction) => {
                   try {
                     const { email, password } = req.body;
@@ -85,9 +131,39 @@ export default (app:Application) =>{
                   }
                 });
 
-            //DESC      Add address
-            // POST     /customer/address
-            // Access   Private
+           
+          
+  /**
+   * @swagger
+   * /customer/address:
+   *   post:
+   *     summary: Add a new address
+   *     description: Adds a new address to the customer's profile.
+   *     tags:
+   *       - Customers
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             properties:
+   *               street:
+   *                 type: string
+   *               postalCode:
+   *                 type: string
+   *               city:
+   *                 type: string
+   *               country:
+   *                 type: string
+   *     responses:
+   *       200:
+   *         description: Address added successfully
+   *       400:
+   *         description: Address could not be added
+   */
           app.post("/customer/address", userAuth, async (req:Request, res:Response, next:NextFunction):Promise<void> => {
             try {
               const { _id } = req.user as payloadType;
@@ -104,16 +180,30 @@ export default (app:Application) =>{
               if(response && response.data){
                   res.status(200).json({customer_details:response.data})
               }else {
-                  res.status(400).json({ message: 'Incorrect password | User does not exist' });
+                  res.status(400).json({ message: 'Address creation unsuccessful' });
               }
             } catch (err) {
               next(err);
             }
           });
 
-            //DESC      Get user profile
-            // GET     /customer/profile
-            // Access   Private
+/**
+ * @swagger
+ * /customer/profile:
+ *   get:
+ *     summary: Get user profile
+ *     description: Fetches the authenticated customer's profile information.
+ *     tags:
+ *       - Customers
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile retrieved successfully
+ *       400:
+ *         description: Profile not available
+ */
+
             app.get("/customer/profile", userAuth, async (req, res, next) => {
                   try {
                     const { _id } = req.user as payloadType;
@@ -130,9 +220,22 @@ export default (app:Application) =>{
                 });
 
                 
-            //DESC      Get shopping details of customer
-            // GET     /customer/shopping-details
-            // Access   Private
+/**
+ * @swagger
+ * /customer/shopping-details:
+ *   get:
+ *     summary: Get shopping details
+ *     description: Fetches the authenticated customer's profile information which in turns has shopping details.
+ *     tags:
+ *       - Customers
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: shopping details retrieved successfully
+ *       400:
+ *         description: Profile not available
+ */
           app.get("/customer/shopping-details", userAuth, async (req, res, next) => {
             try {
               const { _id } = req.user as payloadType;
@@ -147,9 +250,22 @@ export default (app:Application) =>{
             }
           });
 
-            //DESC      Get wishlist of customer
-            // GET     /customer/wishlist
-            // Access   Private
+/**
+ * @swagger
+ * /customer/wishlist:
+ *   get:
+ *     summary: Get user wishlist
+ *     description: Fetches the authenticated customer's profile information.
+ *     tags:
+ *       - Customers
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: wishlist retrieved successfully
+ *       400:
+ *         description: Profile not available
+ */
             app.get("/customer/wishlist", userAuth, async (req, res, next) => {
                   try {
                     const { _id } = req.user as payloadType;
