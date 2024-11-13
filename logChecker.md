@@ -72,3 +72,11 @@ to see the logs
             docker-compose logs -f
 
 -------------------------------------------------------------            
+
+Check the running containers: 
+
+            docker-compose ps
+--------------------------------------------------------
+Since Docker may map your app’s port to a different port on the host, check which host port Docker is using. You can do this by inspecting the docker-compose.yaml file or running:            
+
+            docker-compose port <service_name> 7000
