@@ -10,8 +10,8 @@ const swaggerOptions:Options = {
             },
             servers:[
                   {
-                        url:'http://localhost:7000',
-                        description:'Development server'
+                        url:'https://shopping-cart-backend-ag7z.onrender.com',
+                        description:'Production server'
                   }
             ],
             components: {
